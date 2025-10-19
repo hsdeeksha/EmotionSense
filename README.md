@@ -1,72 +1,165 @@
-# Emotion detection using deep learning
+# EmotionSense
 
-## Introduction
+**EmotionSense** is a real-time facial emotion detection system built with **TensorFlow (Keras)** and **OpenCV**.
+It uses a Convolutional Neural Network (CNN) trained on the **FER-2013** dataset to recognize emotions from live webcam video feeds.
 
-This project aims to classify the emotion on a person's face into one of **seven categories**, using deep convolutional neural networks. The model is trained on the **FER-2013** dataset which was published on International Conference on Machine Learning (ICML). This dataset consists of 35887 grayscale, 48x48 sized face images with **seven emotions** - angry, disgusted, fearful, happy, neutral, sad and surprised.
+> Detect emotions in real time, save reactions, and stream to video-call applications via a virtual webcam.
 
-## Dependencies
+---
 
-* Python 3, [OpenCV](https://opencv.org/), [Tensorflow](https://www.tensorflow.org/)
-* To install the required packages, run `pip install -r requirements.txt`.
+## Key Highlights
 
-## Basic Usage
+* Real-time emotion detection using TensorFlow and OpenCV.
+* Flexible model loader supporting both full saved models and weights-only HDF5 files.
+* Interactive display mode with live emotion labels and top-left statistics overlay.
+* Smooth control system with keyboard shortcuts for overlays and stop commands.
+* Optional virtual webcam support using `pyvirtualcam` for integration with Zoom, Teams, or OBS.
+* Verified on Windows 10 using a Python 3.10 virtual environment for TensorFlow–NumPy compatibility.
 
-The repository is currently compatible with `tensorflow-2.0` and makes use of the Keras API using the `tensorflow.keras` library.
+---
 
-* First, clone the repository and enter the folder
+## Tech Stack
 
-```bash
-git clone https://github.com/atulapra/Emotion-detection.git
-cd Emotion-detection
+| Category    | Tools / Libraries          |
+| ----------- | -------------------------- |
+| Language    | Python 3.10                |
+| Frameworks  | TensorFlow (Keras), OpenCV |
+| Utilities   | NumPy, pyvirtualcam        |
+| Dataset     | FER-2013                   |
+| Environment | Windows 10 (tested)        |
+
+---
+
+## Quick Start (Windows / PowerShell)
+
+### 1. Set up the environment
+
+```powershell
+cd C:\Users\hsdeeksha\OneDrive\Desktop\EmotionSense\Emotion-detection
+python -m venv .venv310
+.\.venv310\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-* Download the FER-2013 dataset inside the `src` folder.
+### 2. Run real-time detection
 
-* If you want to train this model, use:  
-
-```bash
-cd src
-python emotions.py --mode train
+```powershell
+python .\src\emotions.py --mode display --model .\src\model.h5 --camera 0
 ```
 
-* If you want to view the predictions without training again, you can download the pre-trained model from [here](https://drive.google.com/file/d/1FUn0XNOzf-nQV7QjbBPA6-8GLoHNNgv-/view?usp=sharing) and then run:  
+**Controls:**
 
-```bash
-cd src
-python emotions.py --mode display
+* Press `o` to toggle overlays (labels and stats)
+* Press `q`, `Q`, or `ESC` to stop
+* Press `Ctrl + C` in the terminal to stop
+
+---
+
+## Save-on-Detection Mode
+
+Automatically save frames or video clips when specific emotions are detected.
+
+**Example:**
+
+```powershell
+python .\src\emotions.py --mode display --model .\src\model.h5 --camera 0 ^
+--save-on Happy,Sad --save-dir .\saved --clip-length 3.0 --pre-clip 1.0 --cooldown 5 --vcam-fps 10
 ```
 
-* The folder structure is of the form:  
-  src:
-  * data (folder)
-  * `emotions.py` (file)
-  * `haarcascade_frontalface_default.xml` (file)
-  * `model.h5` (file)
+**Flags:**
 
-* This implementation by default detects emotions on all faces in the webcam feed. With a simple 4-layer CNN, the test accuracy reached 63.2% in 50 epochs.
+| Flag                 | Description                                     |
+| -------------------- | ----------------------------------------------- |
+| `--save-on`          | Comma-separated emotion labels to trigger saves |
+| `--save-dir`         | Directory to save output files                  |
+| `--clip-length`      | Length of each saved clip (seconds)             |
+| `--pre-clip`         | Seconds of footage before the trigger           |
+| `--cooldown`         | Time between saves for the same emotion         |
+| `--save-images-only` | Save still images only (no clips)               |
 
-![Accuracy plot](imgs/accuracy.png)
+---
 
-## Data Preparation (optional)
+## Virtual Webcam Mode
 
-* The [original FER2013 dataset in Kaggle](https://www.kaggle.com/deadskull7/fer2013) is available as a single csv file. I had converted into a dataset of images in the PNG format for training/testing.
+Use the `--virtual` flag to stream the processed video feed into apps like Zoom, Teams, or OBS.
 
-* In case you are looking to experiment with new datasets, you may have to deal with data in the csv format. I have provided the code I wrote for data preprocessing in the `dataset_prepare.py` file which can be used for reference.
+**Example:**
 
-## Algorithm
+```powershell
+python .\src\emotions.py --mode display --model .\src\model.h5 --camera 0 --virtual
+```
 
-* First, the **haar cascade** method is used to detect faces in each frame of the webcam feed.
+Requires `pyvirtualcam` (installed automatically via `requirements.txt`).
 
-* The region of image containing the face is resized to **48x48** and is passed as input to the CNN.
+---
 
-* The network outputs a list of **softmax scores** for the seven classes of emotions.
+## Training and Model
 
-* The emotion with maximum score is displayed on the screen.
+* CNN model trained on the **FER-2013** dataset.
+* You can retrain or fine-tune using the following command:
 
-## References
+	```powershell
+	python .\src\emotions.py --mode train
+	```
+* Example accuracy plot:
+	![Training Accuracy](imgs/accuracy.png)
 
-* "Challenges in Representation Learning: A report on three machine learning contests." I Goodfellow, D Erhan, PL Carrier, A Courville, M Mirza, B
-   Hamner, W Cukierski, Y Tang, DH Lee, Y Zhou, C Ramaiah, F Feng, R Li,  
-   X Wang, D Athanasakis, J Shawe-Taylor, M Milakov, J Park, R Ionescu,
-   M Popescu, C Grozea, J Bergstra, J Xie, L Romaszko, B Xu, Z Chuang, and
-   Y. Bengio. arXiv 2013.
+---
+
+## Repository Structure
+
+```
+EmotionSense/
+│
+├── src/
+│   ├── emotions.py                  # Main script (train / display modes)
+│   ├── model.h5                     # Trained model (weights or full)
+│   ├── haarcascade_frontalface_default.xml
+│   ├── dataset_prepare.py           # Dataset preparation utility
+│
+├── imgs/
+│   └── accuracy.png                 # Example training plot
+│
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Troubleshooting
+
+| Issue                   | Solution                                                      |
+| ----------------------- | ------------------------------------------------------------- |
+| TensorFlow import error | Use Python 3.8–3.10 and `numpy==1.23.5`, `tensorflow==2.9.3`  |
+| Haar cascade not found  | Ensure `haarcascade_frontalface_default.xml` exists in `src/` |
+| Webcam not detected     | Adjust `--camera` index (try 1, 2, etc.)                      |
+| Laggy preview           | Reduce frame resolution or disable overlays using the `o` key |
+
+---
+
+## Next Steps
+
+* Convert the model to **TensorFlow.js** for browser-based inference.
+* Integrate a **Streamlit dashboard** for emotion analytics.
+* Make the save-on-detection process **non-blocking** for smoother performance.
+* Add **cloud sync** support for emotion data summaries.
+
+---
+
+## Author
+
+**Deeksha H S**
+GitHub: [hsdeeksha](https://github.com/hsdeeksha)
+
+---
+
+## (Optional) Demo
+
+You can add a short GIF or screenshot here once available:
+
+```markdown
+![EmotionSense Live Demo](imgs/demo.gif)
+```
+
+  
